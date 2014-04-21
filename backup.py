@@ -109,13 +109,13 @@ def backup():
     for vm in vms:
         record = session.xenapi.VM.get_record(vm)
         if record["name_label"] not in arb_exclude and record["is_a_template"] is False and record["is_control_domain"] is False:
-                snapshot = snapshot_vm(session, record, vm)
-                snapshot_id = session.xenapi.VM.get_uuid(snapshot)
-                export_vm(snapshot_id, record["name_label"])
-                upload_vm(record["name_label"])
-                cleanup_backup(record["name_label"])
-                delete_snapshot(session, vm, snapshot_id)
-				delete_export(record["name_label"])
+            snapshot = snapshot_vm(session, record, vm)
+            snapshot_id = session.xenapi.VM.get_uuid(snapshot)
+            export_vm(snapshot_id, record["name_label"])
+            upload_vm(record["name_label"])
+            cleanup_backup(record["name_label"])
+            delete_snapshot(session, vm, snapshot_id)
+            delete_export(record["name_label"])
 
 
 backup()

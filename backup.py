@@ -50,15 +50,8 @@ def export_vm(snapshot_id, vm_name):
         makedirs(path.join(arb_backup_path, vm_name))
 
     url = xen_host + "export?uuid=" + snapshot_id
+    filename = vm_name + "_" + arb_timte + ".xva"
 
-    r = requests.get(url, stream=True, auth=(xen_user, xen_pw), verify=False)
-    if r.status_code == 200:
-        with open(path.join(arb_backup_path, vm_name, vm_name + "_" + arb_time + ".xva"), "wb") as f:
-            for chunk in r.iter_content(1024 * 1024 * 10):
-                f.write(chunk)
-
-
-def upload_vm(vm_name):
     f = FTP(ftp_host)
     f.login(ftp_user, ftp_pw)
     f.cwd(ftp_dir)
@@ -68,10 +61,8 @@ def upload_vm(vm_name):
 
     f.cwd(vm_name)
 
-    filename = vm_name + "_" + arb_time + ".xva"
-
-    f.storbinary("STOR " + filename, open(path.join(arb_backup_path, vm_name, filename), "rb"))
-    f.close()
+    r = requests.get(url, stream=True, auth=(xen_user, xen_pw), verify=False)
+    f.storbinary("STOR {}".format(filename), r.raw, blocksize=(1024 * 1024 * 10))
 
 
 def cleanup_backup(vm_name):
@@ -98,10 +89,6 @@ def delete_snapshot(session, vm, snapshot_id):
             session.xenapi.VM.destroy(snapshot)
 
 
-def delete_export(vm_name):
-    remove(path.join(arb_backup_path, vm_name, vm_name + "_" + arb_time + ".xva"))
-
-
 def backup():
     session = get_session()
     vms = get_all_vms(session)
@@ -112,10 +99,8 @@ def backup():
             snapshot = snapshot_vm(session, record, vm)
             snapshot_id = session.xenapi.VM.get_uuid(snapshot)
             export_vm(snapshot_id, record["name_label"])
-            upload_vm(record["name_label"])
             cleanup_backup(record["name_label"])
             delete_snapshot(session, vm, snapshot_id)
-            delete_export(record["name_label"])
 
 
 backup()

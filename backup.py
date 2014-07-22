@@ -50,7 +50,7 @@ def export_vm(snapshot_id, vm_name):
         makedirs(path.join(arb_backup_path, vm_name))
 
     url = xen_host + "export?uuid=" + snapshot_id
-    filename = vm_name + "_" + arb_timte + ".xva"
+    filename = vm_name + "_" + arb_time + ".xva"
 
     f = FTP(ftp_host)
     f.login(ftp_user, ftp_pw)

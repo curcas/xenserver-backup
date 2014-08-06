@@ -73,6 +73,8 @@ def cleanup_backup(vm_name):
     f.cwd(vm_name)
 
     files = f.nlst()
+    files.remove(".")
+    files.remove("..")
 
     if len(files) > ftp_count:
         files.sort()

@@ -88,7 +88,19 @@ def delete_snapshot(session, vm, snapshot_id):
     for snapshot in record["snapshots"]:
         uuid = session.xenapi.VM.get_uuid(snapshot)
         if uuid == snapshot_id:
+            all_vms = session.xenapi.VM.get_all_records()
+            all_vbds = session.xenapi.VBD.get_all_records()
+            all_vdis = session.xenapi.VDI.get_all_records()
+
+            snapshot_record = all_vms[snapshot]
+
             session.xenapi.VM.destroy(snapshot)
+            for vbd in snapshot_record["VBDs"]:
+                vbd_record = all_vbds[vbd]
+                if vbd_record["type"] == "Disk":
+                    vdi_record = all_vdis[vbd_record["VDI"]]
+                    vdi = session.xenapi.VDI.get_by_uuid(vdi_record["uuid"])
+                    session.xenapi.VDI.destroy(vdi)
 
 
 def backup():
